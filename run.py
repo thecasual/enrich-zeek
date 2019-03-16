@@ -21,16 +21,3 @@ if args.domain:
     print("Domain validated")
     domain.checkdomain()
   print(domain.message)
-
-
-'''
-Example
-dnsquery = intel('google.com', 'dns', 'apikey')
-dnsquery.geturl()
-dnsquery.checkdomain()
-dnsquery.parsedomain()
-print(dnsquery.message)
-'''
-
-
-

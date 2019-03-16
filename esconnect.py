@@ -25,16 +25,3 @@ class es():
     self.result = self.search.execute()
     for i in self.result:
       self.list.add(i.query)
-
-
-'''
-Example
-
-client = es()
-client.connect()
-client.search = Search(using=client.client, index='*:logstash-bro*').query({"match" : {"event_type":"bro_dns"}}).filter('range', ** { '@timestamp': {'gt': 'now-15m'}})
-client.query()
-print(client.list)
-'''
-
-

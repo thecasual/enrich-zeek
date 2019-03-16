@@ -3,16 +3,11 @@ import re
 import configparser
 import os.path
 
-
-
 config = configparser.ConfigParser()
 if os.path.isfile('enricher_custom.conf'):
     config.read('enricher_custom.conf')
 else:
     config.read('enricher.conf')
-
-
-
 
 class intel():
   def __init__(self, data, datatype, apikey=None, url=None, hasdata=False):
@@ -48,5 +43,3 @@ class intel():
       self.message['Domain'] = self.response["resource"]
       for i in self.response["scans"]:
         self.message[i] = self.response["scans"][i]["result"]
-
-
