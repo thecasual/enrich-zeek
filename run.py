@@ -1,5 +1,6 @@
 import argparse
 from intel import intel
+from esconnect import es
 
 #Run as windows service - schedule task - cronjob
 #Query elasticsearch
