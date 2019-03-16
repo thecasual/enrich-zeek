@@ -16,11 +16,13 @@ class intel():
     self.apikey = apikey
     self.url = url
     self.hasdata = hasdata
-
+    self.score = 0
+    
     if self.datatype == 'dns':
       self.url = 'https://www.virustotal.com/vtapi/v2/url/report'
       self.regex = re.compile('(^(www\.|https:\/\/)(?=[\s\S]+\.[\s\S]+$)[\w\d-]+\.\w+|(?=[\s\S]+\.[\s\S]+$))')
       self.apikey = config['DEFAULT']['apikey']
+      self.cleanregex = re.compile('(^(?!(clean|unrated)))')
 
     if re.match(self.regex, self.data):
       self.matchregex = True
@@ -31,15 +33,32 @@ class intel():
     self.response = response.json()
     #Maybe add check here to see if data is good
     self.hasdata = True
+
     if self.hasdata == True:
       self.parsedomain()
 
   def parsedomain(self):
     self.message = {}
+
     if self.response['verbose_msg'] == 'Resource does not exist in the dataset':
       print("Resource does not exist in the dataset")
       return "Resource does not exist in the dataset"
     else:
       self.message['Domain'] = self.response["resource"]
+
       for i in self.response["scans"]:
         self.message[i] = self.response["scans"][i]["result"]
+
+      self.totalsources = len(self.message)
+
+      for key, value in self.message.items():
+        if re.match(self.cleanregex, value):
+          self.score = self.score +1
+
+      #Adjust for the domain entry
+      if self.score > 0:
+        self.score = self.score - 1
+          
+        
+      
+      

@@ -3,7 +3,6 @@ from intel import intel
 from esconnect import es
 
 #Run as windows service - schedule task - cronjob
-#Query elasticsearch
 #Compare query to intel index
 #If already exist in intel index ignore
 #If not in index, query VT and write to index
@@ -21,4 +20,4 @@ if args.domain:
   if domain.matchregex:
     print("Domain validated")
     domain.checkdomain()
-  print(domain.message)
+  print("The domain \"{0}\" has a total of {1} hits from {2} intel sources.".format(domain.data, domain.score, domain.totalsources))
