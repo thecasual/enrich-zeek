@@ -1,6 +1,7 @@
 import argparse
 from intel import intel
 from esconnect import es
+from elasticsearch_dsl import Search
 
 #Run as windows service - schedule task - cronjob
 #Compare query to intel index
@@ -21,3 +22,11 @@ if args.domain:
     print("Domain validated")
     domain.checkdomain()
   print("The domain \"{0}\" has a total of {1} hits from {2} intel sources.".format(domain.data, domain.score, domain.totalsources))
+
+
+#ES Tester
+client = es()
+client.connect()
+client.search = Search(using=client.client, index='*:logstash-bro*').query({"match" : {"event_type":"bro_dns"}}).filter('range', ** { '@timestamp': {'gt': 'now-15m'}})
+client.query()
+print(client.list)

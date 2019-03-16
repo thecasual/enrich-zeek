@@ -21,6 +21,7 @@ class es():
   def connect(self):
     self.client = Elasticsearch(hosts=self.eshost, timeout=self.servertimeout)
 
+#Example query object --> Search(using=client.client, index='*:logstash-bro*').query({"match" : {"event_type":"bro_dns"}}).filter('range', ** { '@timestamp': {'gt': 'now-15m'}})
   def query(self):
     self.result = self.search.execute()
     for i in self.result:
