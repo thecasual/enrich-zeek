@@ -17,48 +17,54 @@ class intel():
     self.url = url
     self.hasdata = hasdata
     self.score = 0
+    self.matchregex=False
     
     if self.datatype == 'dns':
       self.url = 'https://www.virustotal.com/vtapi/v2/url/report'
-      self.regex = re.compile('(^(www\.|https:\/\/)(?=[\s\S]+\.[\s\S]+$)[\w\d-]+\.\w+|(?=[\s\S]+\.[\s\S]+$))')
+      self.regex = re.compile('(^[\d\w-]+\.[\d\w]+$)')
       self.apikey = config['DEFAULT']['apikey']
       self.cleanregex = re.compile('(^(?!(clean|unrated)))')
 
+    if self.datatype == 'sha256':
+      self.url = 'https://www.virustotal.com/vtapi/v2/file/report'
+      self.regex = re.compile('([A-Fa-f0-9]{64})')
+      self.apikey = config['DEFAULT']['apikey']
+      self.cleanregex = re.compile('(^(?!(None)))')
+      
     if re.match(self.regex, self.data):
       self.matchregex = True
 
-  def checkdomain(self):
+  def check(self):
     params = {'apikey': self.apikey, 'resource': self.data}
     response = requests.get(self.url, params=params)
-    self.response = response.json()
-    #Maybe add check here to see if data is good
-    self.hasdata = True
+    print(response)
+    if response.status_code==200:
 
-    if self.hasdata == True:
-      self.parsedomain()
+      self.response = response.json()
+      if self.response['verbose_msg'] == 'Scan finished, scan information embedded in this object':
+        self.hasdata=True  
+      if self.response['verbose_msg'] == 'Scan finished, information embedded':
+        self.hasdata=True 
 
-  def parsedomain(self):
+  def parse(self):
     self.message = {}
 
     if self.response['verbose_msg'] == 'Resource does not exist in the dataset':
       print("Resource does not exist in the dataset")
       return "Resource does not exist in the dataset"
     else:
-      self.message['Domain'] = self.response["resource"]
+      self.datatype = self.data
 
-      for i in self.response["scans"]:
-        self.message[i] = self.response["scans"][i]["result"]
+      for sources in self.response["scans"]:
+        self.message[sources] = self.response["scans"][sources]["result"]
 
+       
       self.totalsources = len(self.message)
 
       for key, value in self.message.items():
-        if re.match(self.cleanregex, value):
+        if value == None:
           self.score = self.score +1
 
       #Adjust for the domain entry
-      if self.score > 0:
-        self.score = self.score - 1
-          
-        
-      
-      
+      if self.totalsources > 0:
+        self.totalsources = self.totalsources - 1
