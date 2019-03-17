@@ -49,15 +49,15 @@ class intel():
       print("Resource does not exist in the dataset")
       return "Resource does not exist in the dataset"
     else:
-      self.datatype = self.data
-
+      self.message[self.datatype] = self.data
       for sources in self.response["scans"]:
         self.message[sources] = self.response["scans"][sources]["result"]
-        
+
       self.totalsources = len(self.message)
+      #Adjust for the domain entry
+      if self.totalsources > 0:
+        self.totalsources = self.totalsources - 1
 
       for key, value in self.message.items():
-        if re.match(self.cleanregex, str(value)):
+        if re.match(self.cleanregex, str(value)) or value == self.data:
           self.score = self.score +1
-
-      
