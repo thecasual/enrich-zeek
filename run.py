@@ -2,6 +2,8 @@ import argparse
 from intel import intel
 from esconnect import es
 from elasticsearch_dsl import Search
+import configparser
+import os.path
 
 #Run as windows service - schedule task - cronjob
 #Compare query to intel index
@@ -9,43 +11,35 @@ from elasticsearch_dsl import Search
 #If not in index, query VT and write to index
 #If score is higher than X than send email(s)
 
+
+config = configparser.ConfigParser()
+if os.path.isfile('enricher_custom.conf'):
+    config.read('enricher_custom.conf')
+else:
+    config.read('enricher.conf')
+apikey = config['DEFAULT']['apikey']
+
+
 desc = 'Intel Checker'
 parser = argparse.ArgumentParser(description=desc)
-parser.add_argument("--domain", "-d", help="Example: www.google.com")
-parser.add_argument("--file", "-f", help="Example: aca2d12934935b070df8f50e06a20539")
+parser.add_argument("--data", "-d", help="Example: google.com or F68E37DC9CABF2EE8B94D6A5D28AD04BE246CCC2E82911F8F1AC390DCF0EE364")
 args = parser.parse_args()
 
-if args.domain:
-  domain = intel(args.domain, 'dns')
-  print("Domain provided")
+if args.data:
+  data = intel(args.data, apikey)
 
-  if domain.matchregex:
-    print("Domain validated")
-    domain.check()
-    if domain.hasdata == True:
-      domain.parse()
-      print("The domain \"{0}\" has a total of {1} hits from {2} intel sources.".format(domain.data, domain.score, domain.totalsources))
-    else:
-      print("Domain does not exist or hit rate limit")  
-  else:
-    print("Domain does not match.")
-    exit()
+  if data.matchregex:
+    print("{0} matches the regex for {1}".format(data.data, data.datatype))
+    data.check()
 
-if args.file:
-  file=intel(args.file, 'sha256')
-  print("Hash provided")
-  if file.matchregex:
-    file.check()
-    
-    if file.hasdata == True:
-      file.parse()
-      print("The hash \"{0}\" has a total of {1} hits from {2} intel sources.".format(file.data, file.totalsources-file.score, file.totalsources))
+    if data.hasdata == True:
+      data.parse()
+      print("The query \"{0}\" has a total of {1} hits from {2} intel sources.".format(data.data, data.score, data.totalsources))
     else:
-      print("File does not exist or hit rate limit")  
+      print("Data does not exist or the rate limit has been met")  
   else:
-    print("Hash does not match.")
+    print("Query provided does not match an accepted value")
     exit()
-  
 
 #ES Tester
 #client = es()
